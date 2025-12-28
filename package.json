@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "cross-env NODE_ENV=production PORT=8080 tsx src/index.tsx",
+    "start": "cross-env NODE_ENV=production PORT=8080 node server.js",
     "dev:server": "tsx src/index.tsx",
     "check": "tsc",
     "db:push": "drizzle-kit push"
+
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -29,6 +30,7 @@
     "cross-env": "^10.1.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^5.4.21"
   }
