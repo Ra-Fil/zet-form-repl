@@ -5,13 +5,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "NODE_ENV=production PORT=8080 node server.js",
-    "start:win": "cross-env NODE_ENV=production PORT=8080 node server.js",
+    "start": "cross-env NODE_ENV=production PORT=8080 node server.js",
     "dev:server": "node server.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
-  },
-
   },
   "dependencies": {
     "cors": "^2.8.5",
