@@ -3,6 +3,7 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import "dotenv/config";
 
 
 dotenv.config();
@@ -18,9 +19,19 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Database connection
-const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("Missing DATABASE_URL");
+}
+
+const useSsl =
+  /sslmode=require/i.test(databaseUrl) ||
+  process.env.PGSSLMODE === "require";
+
+export const pool = new pg.Pool({
+  connectionString: databaseUrl,
+  ssl: useSsl ? { rejectUnauthorized: false } : false,
 });
 
 // Database Initialization
@@ -406,4 +417,3 @@ initDb().then(() => {
         console.log(`Server running on port ${port}`);
     });
 });
-
