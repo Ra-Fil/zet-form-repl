@@ -1,7 +1,6 @@
 
 import { Submission, EventStatus, ServerFile } from './types';
 
-// Helper to convert File to base64 for API transmission
 const fileToServerFile = (file: File): Promise<ServerFile> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -79,8 +78,6 @@ export const updateSubmissionStatus = async (id: string, newStatus: EventStatus)
     
     if (!response.ok) throw new Error('Chyba při aktualizaci stavu.');
     
-    // For simplicity in UI update, we just fetch the full object or patch it locally
-    // In a real app, we might return the updated object from server
     return (await getSubmissionWithFiles(id)) as Submission;
 };
 

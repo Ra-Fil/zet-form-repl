@@ -3,7 +3,6 @@ import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import "dotenv/config";
 
 
 dotenv.config();
@@ -407,3 +406,4 @@ initDb().then(() => {
         console.log(`Server running on port ${port}`);
     });
 });
+
