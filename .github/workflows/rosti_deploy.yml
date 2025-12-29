@@ -72,7 +72,7 @@ jobs:
                       proxy_set_header   Host       \$host;
               }
               location /static/ {
-                      alias /srv/app/public/;
+                      alias /srv/app/;
               }
           }        
           EOF
