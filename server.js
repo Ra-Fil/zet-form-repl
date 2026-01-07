@@ -337,9 +337,21 @@ app.post('/api/submissions', async (req, res) => {
             <p><strong>Popis požadavku:</strong></p>
             <p>${data.requestDescription}</p>
         `;
+        
+        // Use a local transporter to ensure it's always fresh and configured
+        const mailTransporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '465'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+
         try {
             // 1) Email uživateli
-            await transporter.sendMail({
+            await mailTransporter.sendMail({
                 from: `"Zetor Servis" <${process.env.SMTP_USER}>`,
                 to: data.email,
                 subject: `Potvrzení přijetí požadavku č. ${id}`,
@@ -352,7 +364,7 @@ app.post('/api/submissions', async (req, res) => {
                 `
             });
             // 2) Email administrátorům
-            await transporter.sendMail({
+            await mailTransporter.sendMail({
                 from: `"Zetor System" <${process.env.SMTP_USER}>`,
                 to: adminEmails,
                 subject: `NOVÝ PŘÍPAD: ${id} - ${data.contactPerson}`,
