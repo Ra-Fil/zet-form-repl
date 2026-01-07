@@ -4,9 +4,19 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import "dotenv/config";
-
+import nodemailer from 'nodemailer';
 
 dotenv.config();
+// Email transporter configuration
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -314,6 +324,44 @@ app.post('/api/submissions', async (req, res) => {
         await insertFile(data.vehicleDocumentationPhotos, 'vehicle');
 
         await client.query('COMMIT');
+        // Send Emails
+        const adminEmails = 'info@zetor-servis.cz, admin@zetor-servis.cz'; // Pevně nastavené emaily
+        
+        const emailContent = `
+            <h2>Nový požadavek v systému: ${id}</h2>
+            <p><strong>Kontaktní osoba:</strong> ${data.contactPerson}</p>
+            <p><strong>Firma:</strong> ${data.company || '-'}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Telefon:</strong> ${data.phone}</p>
+            <hr>
+            <p><strong>Popis požadavku:</strong></p>
+            <p>${data.requestDescription}</p>
+        `;
+        try {
+            // 1) Email uživateli
+            await transporter.sendMail({
+                from: `"Zetor Servis" <${process.env.SMTP_USER}>`,
+                to: data.email,
+                subject: `Potvrzení přijetí požadavku č. ${id}`,
+                html: `
+                    <h1>Dobrý den,</h1>
+                    <p>děkujeme za Váš požadavek. Zaevidovali jsme jej pod číslem <strong>${id}</strong>.</p>
+                    <p>Naši pracovníci Vás budou brzy kontaktovat.</p>
+                    <br>
+                    ${emailContent}
+                `
+            });
+            // 2) Email administrátorům
+            await transporter.sendMail({
+                from: `"Zetor System" <${process.env.SMTP_USER}>`,
+                to: adminEmails,
+                subject: `NOVÝ PŘÍPAD: ${id} - ${data.contactPerson}`,
+                html: emailContent
+            });
+            console.log("Emails sent successfully");
+        } catch (emailErr) {
+            console.error("Failed to send emails:", emailErr);
+        }
         res.status(201).json({ id });
     } catch (err) {
         await client.query('ROLLBACK');
