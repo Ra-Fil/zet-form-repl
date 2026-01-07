@@ -27,6 +27,11 @@ Aplikace je nakonfigurována tak, aby se při startu automaticky spustily správ
 node server.js
 ```
 
+**Build:**
+```bash
+npm run build
+```
+
 **Buildovací příkaz (Build Command):**
 Rosti automaticky spustí `npm install`. Pro sestavení frontendu je potřeba zajistit, aby proběhl `npm run build`. V souboru `package.json` je tento krok nastaven v sekci `scripts`.
 
