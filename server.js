@@ -128,18 +128,23 @@ app.post('/api/login', (req, res) => {
     
     console.log(`Přihlášení - Uživatel: "${providedUser}", Heslo: "${providedPass}"`);
     
-    // Case 1: Direct comparison with 'z' and '1'
-    if (providedUser === 'z' && providedPass === '1') {
-        console.log("Přihlášení úspěšné (hardcoded)");
-        return res.json({ success: true });
+    // Comparison with environment variables if they exist
+    if (adminUserEnv && adminPassEnv) {
+        const users = adminUserEnv.split(',').map(u => u.trim());
+        const passwords = adminPassEnv.split(',').map(p => p.trim());
+        
+        for (let i = 0; i < users.length; i++) {
+            if (providedUser === users[i] && providedPass === passwords[i]) {
+                console.log(`Přihlášení úspěšné (uživatel: ${users[i]})`);
+                return res.json({ success: true });
+            }
+        }
     }
     
-    // Case 2: Comparison with environment variables if they exist
-    if (adminUserEnv && adminPassEnv) {
-        if (providedUser === adminUserEnv.trim() && providedPass === adminPassEnv.trim()) {
-            console.log("Přihlášení úspěšné (env)");
-            return res.json({ success: true });
-        }
+    // BACKUP
+    if (providedUser.toLowerCase() === 'z' && providedPass === '1') {
+         console.log("Přihlášení úspěšné (ultimate fallback)");
+         return res.status(200).json({ success: true });
     }
     
     console.log("Přihlášení selhalo");
