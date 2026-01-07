@@ -325,7 +325,7 @@ app.post('/api/submissions', async (req, res) => {
 
         await client.query('COMMIT');
         // Send Emails
-        const adminEmails = 'info@zetor-servis.cz, admin@zetor-servis.cz'; // Pevně nastavené emaily
+        const adminEmails = process.env.NOTIFICATION_EMAILS;
         
         const emailContent = `
             <h2>Nový požadavek v systému: ${id}</h2>
