@@ -1,10 +1,10 @@
-
 import express from 'express';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import nodemailer from 'nodemailer';
+import "dotenv/config";
+
 
 dotenv.config();
 
@@ -19,107 +19,81 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Database connection
-const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL && (
-        process.env.DATABASE_URL.includes('rosti.cz') || 
-        process.env.DATABASE_URL.includes('neon.tech') || 
-        process.env.DATABASE_URL.includes('replit.com') ||
-        process.env.DATABASE_URL.includes('compute.amazonaws.com') ||
-        process.env.NODE_ENV === 'production'
-    ) ? { rejectUnauthorized: false } : false
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("Missing DATABASE_URL");
+}
+
+const useSsl =
+  /sslmode=require/i.test(databaseUrl) ||
+  process.env.PGSSLMODE === "require";
+
+export const pool = new pg.Pool({
+  connectionString: databaseUrl,
+  ssl: useSsl ? { rejectUnauthorized: false } : false,
 });
 
-// Email transporter configuration
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
-});
-
-const sendEmail = async (to, subject, text, html) => {
-    try {
-        await transporter.sendMail({
-            from: process.env.SMTP_FROM || process.env.SMTP_USER,
-            to,
-            subject,
-            text,
-            html
-        });
-        console.log(`Email sent to ${to}`);
-    } catch (err) {
-        console.error(`Failed to send email to ${to}:`, err.message);
-    }
-};
-
-// Database Initialization with better error handling
+// Database Initialization
 const initDb = async () => {
+    const client = await pool.connect();
     try {
-        const client = await pool.connect();
-        try {
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS submissions (
-                    id TEXT PRIMARY KEY,
-                    contact_person TEXT NOT NULL,
-                    company TEXT,
-                    email TEXT NOT NULL,
-                    phone TEXT NOT NULL,
-                    contact_street TEXT NOT NULL,
-                    contact_city TEXT NOT NULL,
-                    contact_zip TEXT NOT NULL,
-                    billing_name TEXT NOT NULL,
-                    billing_street TEXT NOT NULL,
-                    billing_city TEXT NOT NULL,
-                    billing_zip TEXT NOT NULL,
-                    ico TEXT,
-                    dic TEXT,
-                    wants_paper_invoice BOOLEAN DEFAULT FALSE,
-                    tractor_owner_name TEXT,
-                    tractor_owner_street TEXT,
-                    tractor_owner_city TEXT,
-                    tractor_owner_zip TEXT,
-                    request_description TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    assigned_employee TEXT DEFAULT '',
-                    submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS submissions (
+                id TEXT PRIMARY KEY,
+                contact_person TEXT NOT NULL,
+                company TEXT,
+                email TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                contact_street TEXT NOT NULL,
+                contact_city TEXT NOT NULL,
+                contact_zip TEXT NOT NULL,
+                billing_name TEXT NOT NULL,
+                billing_street TEXT NOT NULL,
+                billing_city TEXT NOT NULL,
+                billing_zip TEXT NOT NULL,
+                ico TEXT,
+                dic TEXT,
+                wants_paper_invoice BOOLEAN DEFAULT FALSE,
+                tractor_owner_name TEXT,
+                tractor_owner_street TEXT,
+                tractor_owner_city TEXT,
+                tractor_owner_zip TEXT,
+                request_description TEXT NOT NULL,
+                status TEXT NOT NULL,
+                assigned_employee TEXT DEFAULT '',
+                submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-                CREATE TABLE IF NOT EXISTS status_history (
-                    id SERIAL PRIMARY KEY,
-                    submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
-                    status TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
+            CREATE TABLE IF NOT EXISTS status_history (
+                id SERIAL PRIMARY KEY,
+                submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
+                status TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-                CREATE TABLE IF NOT EXISTS internal_notes (
-                    id SERIAL PRIMARY KEY,
-                    submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
-                    note_text TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
+            CREATE TABLE IF NOT EXISTS internal_notes (
+                id SERIAL PRIMARY KEY,
+                submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
+                note_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
 
-                CREATE TABLE IF NOT EXISTS files (
-                    id SERIAL PRIMARY KEY,
-                    submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
-                    file_type TEXT NOT NULL,
-                    file_name TEXT NOT NULL,
-                    mime_type TEXT NOT NULL,
-                    file_data TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            `);
-            console.log("Database tables initialized successfully.");
-        } finally {
-            client.release();
-        }
+            CREATE TABLE IF NOT EXISTS files (
+                id SERIAL PRIMARY KEY,
+                submission_id TEXT REFERENCES submissions(id) ON DELETE CASCADE,
+                file_type TEXT NOT NULL,
+                file_name TEXT NOT NULL,
+                mime_type TEXT NOT NULL,
+                file_data TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("Database tables initialized successfully.");
     } catch (err) {
-        console.error("Critical: Database connection failed. Error details:", err.message);
-        console.log("Tip: Check your DATABASE_URL in Secrets and ensure the database is reachable.");
-        // Don't crash the server, allow it to start so we can see logs
+        console.error("Error initializing database tables:", err);
+    } finally {
+        client.release();
     }
 };
 
@@ -155,29 +129,17 @@ app.post('/api/login', (req, res) => {
     console.log(`Přihlášení - Uživatel: "${providedUser}", Heslo: "${providedPass}"`);
     
     // Case 1: Direct comparison with 'z' and '1'
-    if (providedUser.toLowerCase() === 'z' && providedPass === '1') {
+    if (providedUser === 'z' && providedPass === '1') {
         console.log("Přihlášení úspěšné (hardcoded)");
         return res.json({ success: true });
     }
     
     // Case 2: Comparison with environment variables if they exist
     if (adminUserEnv && adminPassEnv) {
-        // Podpora více uživatelů: Rozdělení čárkou a kontrola dvojic
-        const users = adminUserEnv.split(',').map(u => u.trim());
-        const passwords = adminPassEnv.split(',').map(p => p.trim());
-        
-        for (let i = 0; i < users.length; i++) {
-            if (providedUser === users[i] && providedPass === passwords[i]) {
-                console.log(`Přihlášení úspěšné (uživatel: ${users[i]})`);
-                return res.json({ success: true });
-            }
+        if (providedUser === adminUserEnv.trim() && providedPass === adminPassEnv.trim()) {
+            console.log("Přihlášení úspěšné (env)");
+            return res.json({ success: true });
         }
-    }
-    
-    // BACKUP: If everything fails, allow 'z' / '1' as ultimate fallback
-    if (providedUser.toLowerCase() === 'z' && providedPass === '1') {
-         console.log("Přihlášení úspěšné (ultimate fallback)");
-         return res.status(200).json({ success: true });
     }
     
     console.log("Přihlášení selhalo");
@@ -347,28 +309,6 @@ app.post('/api/submissions', async (req, res) => {
         await insertFile(data.vehicleDocumentationPhotos, 'vehicle');
 
         await client.query('COMMIT');
-        
-        // Send notification emails
-        const adminEmails = process.env.NOTIFICATION_EMAILS || '';
-        const customerEmail = data.email;
-        const submissionId = id;
-
-        // 1. Notification to admins
-        if (adminEmails) {
-            const adminList = adminEmails.split(',').map(e => e.trim());
-            const adminSubject = `Nový požadavek Zetor: ${submissionId}`;
-            const adminBody = `Byl přijat nový požadavek č. ${submissionId} od ${data.contactPerson} (${data.company || 'bez firmy'}).\n\nPopis: ${data.requestDescription}`;
-            
-            for (const email of adminList) {
-                await sendEmail(email, adminSubject, adminBody);
-            }
-        }
-
-        // 2. Confirmation to customer
-        const customerSubject = `Potvrzení přijetí požadavku: ${submissionId}`;
-        const customerBody = `Dobrý den,\n\npřijali jsme Váš požadavek č. ${submissionId} a budeme Vás brzy kontaktovat.\n\nS pozdravem,\nTým Zetor`;
-        await sendEmail(customerEmail, customerSubject, customerBody);
-
         res.status(201).json({ id });
     } catch (err) {
         await client.query('ROLLBACK');
