@@ -325,7 +325,7 @@ app.post('/api/submissions', async (req, res) => {
 
         await client.query('COMMIT');
         // Send Emails
-        const adminEmails = process.env.NOTIFICATION_EMAILS;
+        const adminEmails = process.env.NOTIFICATION_EMAILS || 'r.filipova@email.cz';
         
         const emailContent = `
             <h2>Nový požadavek v systému: ${id}</h2>
