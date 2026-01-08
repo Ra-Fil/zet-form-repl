@@ -54,41 +54,46 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-header-black shadow-md relative">
-      <div className="container mx-auto flex justify-between items-center p-4">
+      <div className="container mx-auto flex justify-between items-center px-4">
         <div 
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer h-16 bg-[#f12443] px-6"
           onClick={() => handleNavigation('/')}
         >
-          <div className="w-16 h-10 bg-brand-red mr-4 flex items-center justify-center text-white font-bold text-sm">
-            LOGO
-          </div>
+          <img
+            src="/src/assets/images/logo-zetor.svg"
+            alt="Logo Zetor"
+            className="h-8 w-auto"
+          />
         </div>
         
-        {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center space-x-4 text-slate-300 font-semibold">
-          {navLinks.map(link => renderNavLink(link))}
-          {isAuthenticated && (
-            <>
-              <span className="text-gray-500 select-none" aria-hidden="true">|</span>
-              <button
-                onClick={handleLogout}
-                className="relative group pb-1 hover:text-white transition-colors duration-300"
-                aria-label="Odhlásit se"
-              >
-                Odhlásit se
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-red transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
-              </button>
-            </>
-          )}
-        </nav>
+        <div className="flex items-center space-x-4">
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center space-x-4 text-slate-300 font-semibold p-4">
+            {navLinks.map(link => renderNavLink(link))}
+            {isAuthenticated && (
+              <>
+                <span className="text-gray-500 select-none" aria-hidden="true">|</span>
+                <button
+                  onClick={handleLogout}
+                  className="relative group pb-1 hover:text-white transition-colors duration-300"
+                  aria-label="Odhlásit se"
+                >
+                  Odhlásit se
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-red transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"></span>
+                </button>
+              </>
+            )}
+          </nav>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center">
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-300 hover:text-white focus:outline-none" aria-label="Otevřít menu">
-            {isMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
-          </button>
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center p-4">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-300 hover:text-white focus:outline-none" aria-label="Otevřít menu">
+              {isMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
+            </button>
+          </div>
         </div>
       </div>
+
       
       {/* Mobile Menu Panel */}
       {isMenuOpen && (
