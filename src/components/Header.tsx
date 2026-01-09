@@ -60,7 +60,7 @@ const Header: React.FC = () => {
           onClick={() => handleNavigation('/')}
         >
           <img
-            src="/src/assets/images/logo-zetor.svg"
+            src="/assets/images/logo-zetor.svg"
             alt="Logo Zetor"
             className="h-8 w-auto"
           />
