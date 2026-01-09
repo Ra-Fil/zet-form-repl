@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import logoZetor from '../assets/images/logo-zetor.svg'; 
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,7 +60,7 @@ const Header: React.FC = () => {
           onClick={() => handleNavigation('/')}
         >
           <img
-            src="/assets/images/logo-zetor.svg"
+            src={logoZetor}
             alt="Logo Zetor"
             className="h-8 w-auto"
           />
