@@ -341,7 +341,7 @@ app.post('/api/submissions', async (req, res) => {
         // Use a local transporter to ensure it's always fresh and configured
         const mailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT || '465'),
+            port: parseInt(process.env.SMTP_PORT || '25'),
             secure: process.env.SMTP_SECURE === 'true',
             auth: {
                 user: process.env.SMTP_USER,
@@ -365,7 +365,7 @@ app.post('/api/submissions', async (req, res) => {
             });
             // 2) Email administrátorům
             await mailTransporter.sendMail({
-                from: `"Zetor System" <${process.env.SMTP_USER}>`,
+                from: `"Zetor Servis" <${process.env.SMTP_USER}>`,
                 to: adminEmails,
                 subject: `NOVÝ PŘÍPAD: ${id} - ${data.contactPerson}`,
                 html: emailContent
