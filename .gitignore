@@ -2,5 +2,5 @@
 node_modules/
 .env*
 .md*
-playwright.config.ts
-tests/
+.playwright.config.ts*
+tests
