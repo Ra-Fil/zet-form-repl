@@ -349,10 +349,11 @@ app.post('/api/submissions', async (req, res) => {
             },
         });
 
+        const fromAddress = process.env.SMTP_FROM || `"Zetor Servis" <${process.env.SMTP_USER}>`;
         try {
             // 1) Email uživateli
             await mailTransporter.sendMail({
-                from: `"Zetor Servis" <${process.env.SMTP_USER}>`,
+                from: fromAddress,
                 to: data.email,
                 subject: `Potvrzení přijetí požadavku č. ${id}`,
                 html: `
@@ -365,7 +366,7 @@ app.post('/api/submissions', async (req, res) => {
             });
             // 2) Email administrátorům
             await mailTransporter.sendMail({
-                from: `"Zetor Servis" <${process.env.SMTP_USER}>`,
+                from: fromAddress,
                 to: adminEmails,
                 subject: `NOVÝ PŘÍPAD: ${id} - ${data.contactPerson}`,
                 html: emailContent
