@@ -1,6 +1,5 @@
 .claude
 node_modules/
+.tests
 .env*
-.md*
-tests/
-.playwright.config.ts
+
