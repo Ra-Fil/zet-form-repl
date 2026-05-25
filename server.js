@@ -339,6 +339,17 @@ app.post('/api/submissions', async (req, res) => {
         `;
         
         // Use a local transporter to ensure it's always fresh and configured
+        console.log("[EMAIL] Konfigurace SMTP:", {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE,
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS ? '***nastaven***' : 'NENASTAVEN',
+        });
+        console.log("[EMAIL] Příjemce uživatel:", data.email);
+        console.log("[EMAIL] Příjemce admin:", adminEmails);
+
+        // Use a local transporter to ensure it's always fresh and configured
         const mailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT || '25'),
