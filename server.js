@@ -8,18 +8,14 @@ import nodemailer from 'nodemailer';
 
 dotenv.config();
 // Email transporter configuration
-const smtpPort = parseInt(process.env.SMTP_PORT || '587');
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    ...(smtpPort === 587 ? { requireTLS: true } : {}),
-    ...(process.env.SMTP_USER && process.env.SMTP_PASS ? {
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        }
-    } : {}),
+    port: parseInt(process.env.SMTP_PORT || '25'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
 });
 
 const __filename = fileURLToPath(import.meta.url);
@@ -343,19 +339,14 @@ app.post('/api/submissions', async (req, res) => {
         `;
         
         // Use a local transporter to ensure it's always fresh and configured
-        const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-        console.log(`SMTP config: host=${process.env.SMTP_HOST}, port=${smtpPort}, user=${process.env.SMTP_USER}`);
         const mailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: smtpPort,
-            secure: smtpPort === 465,
-            ...(smtpPort === 587 ? { requireTLS: true } : {}),
-            ...(process.env.SMTP_USER && process.env.SMTP_PASS ? {
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                }
-            } : {}),
+            port: parseInt(process.env.SMTP_PORT || '25'),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
         });
 
         try {
