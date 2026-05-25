@@ -1,4 +1,5 @@
 .claude
 node_modules/
+.tests
 .env*
-.md*
+

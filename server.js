@@ -25,8 +25,8 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Increase limit for base64 file uploads
-app.use(express.json({ limit: '200mb' }));
-app.use(express.urlencoded({ extended: true, limit: '200mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Database connection
 const databaseUrl = process.env.DATABASE_URL;

@@ -9,7 +9,9 @@
     "start:win": "cross-env NODE_ENV=production PORT=8080 node server.js",
     "dev:server": "node server.js",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "test:api": "npx tsx tests/api/submission.test.ts",
+    "test:e2e": "npx playwright test"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -22,6 +24,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^25.0.3",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
