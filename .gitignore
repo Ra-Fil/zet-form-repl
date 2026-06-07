@@ -4,3 +4,4 @@ node_modules/
 .md*
 .playwright.config.ts*
 tests
+test-results
