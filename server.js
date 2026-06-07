@@ -395,6 +395,31 @@ app.post('/api/submissions', async (req, res) => {
     }
 });
 
+app.get('/api/test-smtp', async (req, res) => {
+    const config = {
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '25'),
+        secure: process.env.SMTP_SECURE === 'true',
+        user: process.env.SMTP_USER,
+        passSet: !!process.env.SMTP_PASS,
+        from: process.env.SMTP_FROM,
+    };
+
+    const transporter = nodemailer.createTransport({
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+
+    try {
+        await transporter.verify();
+        res.json({ ok: true, config, message: 'SMTP verify OK' });
+    } catch (err) {
+        res.status(500).json({ ok: false, config, error: err.message, code: err.code });
+    }
+});
+
 app.put('/api/submissions/:id/status', async (req, res) => {
     try {
         const { id } = req.params;
