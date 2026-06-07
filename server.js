@@ -414,7 +414,18 @@ app.get('/api/test-smtp', async (req, res) => {
 
     try {
         await transporter.verify();
-        res.json({ ok: true, config, message: 'SMTP verify OK' });
+        const to = req.query.to;
+        if (to) {
+            const info = await transporter.sendMail({
+                from: process.env.SMTP_FROM || process.env.SMTP_USER,
+                to,
+                subject: '[TEST] Zetor SMTP test z Rosti',
+                text: 'Pokud vidíte tento email, odesílání z produkčního serveru funguje.',
+            });
+            res.json({ ok: true, config, message: 'Email odeslán', messageId: info.messageId, response: info.response });
+        } else {
+            res.json({ ok: true, config, message: 'SMTP verify OK — pro test odeslání přidej ?to=email@example.com' });
+        }
     } catch (err) {
         res.status(500).json({ ok: false, config, error: err.message, code: err.code });
     }
