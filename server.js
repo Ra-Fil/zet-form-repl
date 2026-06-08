@@ -354,6 +354,8 @@ app.post('/api/submissions', async (req, res) => {
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT || '25'),
             secure: process.env.SMTP_SECURE === 'true',
+            requireTLS: process.env.SMTP_REQUIRE_TLS !== 'false',
+            name: process.env.SMTP_EHLO || 'eshop.zetor.cz',
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
@@ -409,6 +411,8 @@ app.get('/api/test-smtp', async (req, res) => {
         host: config.host,
         port: config.port,
         secure: config.secure,
+        requireTLS: process.env.SMTP_REQUIRE_TLS !== 'false',
+        name: process.env.SMTP_EHLO || 'eshop.zetor.cz',
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
 
