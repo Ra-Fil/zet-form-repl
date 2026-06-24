@@ -360,6 +360,8 @@ app.post('/api/submissions', async (req, res) => {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
         });
 
         try {
@@ -405,6 +407,7 @@ app.get('/api/test-smtp', async (req, res) => {
         user: process.env.SMTP_USER,
         passSet: !!process.env.SMTP_PASS,
         from: process.env.SMTP_FROM,
+        ehlo: process.env.SMTP_EHLO,
     };
 
     const transporter = nodemailer.createTransport({
