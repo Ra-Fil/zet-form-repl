@@ -248,7 +248,7 @@ ${submission.statusHistory.map(h => `${h.status.padEnd(30)} ${new Date(h.date).t
           <p className="text-center text-brand-gray py-10">Nenalezeny žádné události odpovídající hledání.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {[...filteredSubmissions].reverse().map((submission) => {
+            {[...filteredSubmissions].map((submission) => {
               const eventId = submission.id;
               const isSelected = selectedSubmission?.id === submission.id;
 
