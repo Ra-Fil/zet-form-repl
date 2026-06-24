@@ -12,6 +12,7 @@ const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '25'),
     secure: process.env.SMTP_SECURE === 'true',
+    name: process.env.SMTP_EHLO,
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -354,6 +355,7 @@ app.post('/api/submissions', async (req, res) => {
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT || '25'),
             secure: process.env.SMTP_SECURE === 'true',
+            name: process.env.SMTP_EHLO,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
@@ -409,6 +411,7 @@ app.get('/api/test-smtp', async (req, res) => {
         host: config.host,
         port: config.port,
         secure: config.secure,
+        name: process.env.SMTP_EHLO,
         auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
 
